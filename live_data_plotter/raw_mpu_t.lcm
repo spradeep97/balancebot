@@ -1,0 +1,5 @@
+struct raw_mpu_t {
+    double accel[3];
+    double gyro[3];
+    double mag[3];
+}

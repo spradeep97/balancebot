@@ -1,0 +1,4 @@
+struct l2g_t {
+    int64_t utime;
+    double l2g[3];
+}

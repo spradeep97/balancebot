@@ -1,0 +1,119 @@
+% TO DO: Add delta_d column and calculate delta_x and delta_y from it 
+% then get x and y vectors and plot 
+
+clc
+clear all
+close all
+
+statelog2 = load('state_log2_12_41.csv');
+statelog2 = statelog2(110:end,:);
+time_vec = 1:length(statelog2(:,1));
+
+delta_theta_thresh = 0.00356;
+T = 0.1;
+psi = statelog2(:,5);
+gyro = -statelog2(:,6);
+for i = 1:length(gyro)
+    if (gyro(i) > 0)
+        gyro(i) = gyro(i) - 2*pi;
+    end
+end
+delta_d = statelog2(:,7);   % ADDED
+psi_prev = [0;psi];
+psi_prev = psi_prev(1:end-1);
+gyro_prev = [0;gyro];
+gyro_prev = gyro_prev(1:end-1);
+delta_psi = psi - psi_prev;
+delta_gyro = gyro - gyro_prev;
+delta_GO = delta_gyro - delta_psi;
+
+if_thresh = (abs(delta_GO) > delta_theta_thresh);
+
+theta = zeros(length(psi), 1);
+theta(1) = 0;
+for i = 2:length(theta)
+   if(if_thresh(i) == 1)
+        %theta(i) = (theta(i-1) + delta_gyro(i)* T);
+        theta(i) = gyro(i); % if diff is high, choose gyro
+   else
+        %theta(i) = theta(i-1) + delta_psi(i)* T;
+        theta(i) = psi(i);  % if diff is low, choose odo
+   end
+end
+
+
+% ADDED
+theta_prev = [0;theta];
+theta_prev = theta_prev(1:end-1);
+delta_theta = theta - theta_prev;
+
+%% ONLY ENCODERS:
+x_enc = zeros(length(theta),1);
+y_enc = zeros(length(theta),1);
+x_enc(1) = 0;
+y_enc(1) = 0;
+for k = 2:length(theta)
+    x_enc(k) = x_enc(k-1) + delta_d(k) * cos(psi(k) + delta_psi(k) / 2);
+    y_enc(k) = y_enc(k-1) + delta_d(k) * sin(psi(k) + delta_psi(k) / 2);
+end
+  
+scatter(x_enc*10,y_enc*10)
+% scatter(time_vec,x_enc*1e2)
+title('x vs y: using encoders')
+hold on
+
+%% ONLY GYRO :
+x_gyro = zeros(length(theta),1);
+y_gyro = zeros(length(theta),1);
+x_gyro(1) = 0;
+y_gyro(1) = 0;
+for k = 2:length(theta)
+    x_gyro(k) = x_gyro(k-1) + delta_d(k) * cos(gyro(k) + delta_gyro(k) / 2);
+    y_gyro(k) = y_gyro(k-1) + delta_d(k) * sin(gyro(k) + delta_gyro(k) / 2);
+end
+scatter(x_gyro*10,y_gyro*10)
+% scatter(time_vec,x_gyro*1e2)
+title('x vs y: using gyro')
+
+%% FUSED GYRO+ENC :
+x_fused = zeros(length(theta),1);
+y_fused = zeros(length(theta),1);
+x_fused(1) = 0;
+y_fused(1) = 0;
+for k = 2:length(theta)
+    x_fused(k) = x_fused(k-1) + delta_d(k) * cos(theta(k) + delta_theta(k) / 2);
+    y_fused(k) = y_fused(k-1) + delta_d(k) * sin(theta(k) + delta_theta(k) / 2);
+end
+  
+scatter(x_fused*10,y_fused*10)
+% scatter(time_vec,x_fused*1e2)
+title('x vs y')
+legend('Odometry', 'Gyro', 'Fused')
+xlabel('x (m)');
+ylabel('y (m)');
+
+%% angles versus time
+% figure
+% scatter(time_vec, psi)
+% %hold on
+% figure
+% scatter(time_vec, gyro)
+% %hold on
+% figure
+% scatter(time_vec, theta)
+% legend('psi','gyro','theta')
+% 
+% figure
+% scatter(time_vec, delta_GO)
+
+%% Testing Fused Data from C file (C File output is fused data now) | Dated: 1/30/20
+
+xval = statelog{:,3};
+yval = statelog{:,4};
+
+figure
+scatter(xval,yval)
+title('x vs y using gyrodometry fused Theta')
+xlabel('x (m)')
+ylabel('y (m)')
+axis equal

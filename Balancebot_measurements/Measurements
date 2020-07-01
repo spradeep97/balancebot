@@ -1,0 +1,30 @@
+Pitch:
+d = 5 inches
+L = 76.5 inches
+
+Yaw:
+d = 7 inches
+L same
+
+Roll:
+d = ?
+L same
+
+
+NEW_Measurements (with read statements in ISR Callback)
+
+
+New_data: Yaw
+New_Data2: Pitch
+New_Data3(Pitch): Pitch
+
+Pitch:
+d = 4 in
+L same
+
+//Motor2
+[ No Load Speed (rpm) : 42.2848, No Load Current (A) : 2.0440,  Stall Torque (N.m) : 0.0676 ]
+[ Motor Constant K : 0.0296, Shaft Friction : 0.0014,  Shaft Inertia (Kg.m^2) : 1.4822e-05 ]
+//Motor1
+[ No Load Speed (rpm) : 45.3042, No Load Current (A) : 0.0958,  Stall Torque (N.m) : 0.5740 ]
+[ Motor Constant K : 0.2512, Shaft Friction : 0.0005,  Shaft Inertia (Kg.m^2) : 5.5055e-06 ]

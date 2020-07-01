@@ -1,0 +1,33 @@
+% TO DO: Add delta_d column and calculate delta_x and delta_y from it 
+% then get x and y vectors and plot 
+
+delta_theta_thresh = 0.01;
+T = 0.1;
+psi = statelog5{:,5};
+gyro = statelog5{:,6};
+delta_d = statelog5{:,7};   % ADDED
+psi_prev = [0;psi];
+psi_prev = psi_prev(1:end-1);
+gyro_prev = [0;gyro];
+gyro_prev = gyro_prev(1:end-1);
+delta_psi = psi - psi_prev;
+delta_gyro = gyro - gyro_prev;
+delta_GO = delta_gyro - delta_psi;
+
+if_thresh = (abs(delta_GO) > delta_theta_thresh);
+
+theta = zeros(length(psi), 1);
+theta(1) = 0;
+for i=2:length(theta)
+   if(if_thresh(i) == 1)
+        theta(i) = theta(i-1) + delta_gyro(i)* T;
+   else
+        theta(i) = theta(i-1) + delta_psi(i)* T;
+   end
+end
+
+% ADDED
+theta_prev = [0;theta];
+theta_prev = theta_prev(
+detla_theta = 
+delta_x = delta_d * cos(theta + )
